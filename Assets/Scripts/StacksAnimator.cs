@@ -5,29 +5,24 @@ using UnityEngine;
 
 public class StacksAnimator : MonoBehaviour
 {
-    private SwipeableObject _fromObj;
-    private SwipeableObject _toObj;
+    public static event Action AnimationEnded;
+    private Action _performAnimation;
 
     private GameObject _targetStack;
-
     private Transform _originalParent;
     private Transform _rotationPivot;
 
     private Quaternion _targetRotation;
-
     private Vector3 _targetPositionA;
     private Vector3 _targetPositionB;
 
-    private float _singleStackHeight;
     [SerializeField]
     private float _speed;
     [SerializeField]
     private float _angularSpeed;
+    private float _singleStackHeight;
     private bool _isReversed;
 
-    private Action _performAnimation;
-
-    public static event Action AnimationEnded;
 
     private void Awake()
     {
@@ -48,13 +43,14 @@ public class StacksAnimator : MonoBehaviour
         SetRotationPivot(from, to);
         _targetRotation = GetTargetRotation(false);
         //get the first position which to traslate the stack
-        _targetPositionA = GetStartingPoint(from);
+        _targetPositionA = GetStartingPoint(from, to);
         //get the last position which to traslate the stack
         _targetPositionB = GetFinalPoint(from, to);
     }
 
     private void TriggerAnimation(bool reverse)
     {
+        TMP2 = _targetStack.transform.position;
         _targetStack.transform.parent = _rotationPivot;
         _isReversed = reverse;
         _performAnimation = PerformStepA;
@@ -116,8 +112,9 @@ public class StacksAnimator : MonoBehaviour
         return new Vector3(tmp.position.x, tmp.position.y + tmp.lossyScale.y * (to.Data.StackCount + from.Data.StackCount - 1), tmp.position.z);
     }
 
-    private Vector3 GetStartingPoint(SwipeableObject from)
+    private Vector3 GetStartingPoint(SwipeableObject from, SwipeableObject to) //bug here
     {
+        if (from.Data.StackCount == to.Data.StackCount) return from.Data.Stack.transform.position;
         return new Vector3(from.Data.Stack.transform.position.x, _rotationPivot.position.y - _singleStackHeight * 0.5f, from.Data.Stack.transform.position.z);
     }
 
@@ -132,13 +129,16 @@ public class StacksAnimator : MonoBehaviour
         }
     }
 
+    Vector3 TMP;
+    Vector3 TMP2;
     private void PerformStepB()
     {
         if (Quaternion.Dot(_rotationPivot.rotation, _targetRotation) < 0.99f)
-            _rotationPivot.rotation = Quaternion.RotateTowards(_rotationPivot.rotation, _targetRotation, Time.deltaTime * _angularSpeed);
+            _rotationPivot.rotation = Quaternion.RotateTowards(_rotationPivot.rotation, _targetRotation, Time.deltaTime * _angularSpeed * 100);
         else
         {
             _rotationPivot.rotation = _targetRotation;
+            TMP = _targetStack.transform.position;
             _performAnimation = PerformStepC;
         }
     }
@@ -160,11 +160,15 @@ public class StacksAnimator : MonoBehaviour
         }
     }
 
-    private void ReverseAnimationData()
+    private void ReverseAnimationData() 
     {
-        Vector3 tmp = _targetPositionB;
-        _targetPositionB = _targetPositionA;
-        _targetPositionA = tmp;
+        //Vector3 tmp = _targetPositionB;
+        Debug.Log("before B: " + _targetPositionB);
+        _targetPositionB = TMP2;
+        Debug.Log("after B: " + _targetPositionB);
+        Debug.Log("before A: " + _targetPositionA);
+        _targetPositionA = TMP;
+        Debug.Log("after A: " + _targetPositionA);
         _targetRotation = GetTargetRotation(true);
         _isReversed = false;
     }
