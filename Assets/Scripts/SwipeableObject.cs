@@ -7,30 +7,24 @@ public class SwipeableObject : MonoBehaviour
 {
     public SwipeableObjectData Data;
     public static event Action OnSwipeableObjMovementEnded;
-    private GameObject _stackToMove;
-    private Vector3 _landingPoint;
     private Action _onPerformMovement;
 
     [SerializeField]
     private Transform _rotationPivot;
     private Transform _newParent;
+    private GameObject _stackToMove;
+    private Vector3 _landingPoint;
     private Quaternion _targetRotation;
-    private Vector3 _rotationAxis;
 
     private float _angularSpeed = 500f;
     private float _speed = 5f;
-    private bool _needTranslation;
 
-    private void Awake()
-    {
-        SwipesManager.TriggerSwipeableObjMoevement += StartPerformingMovement;
-    }
+    public static event Action<bool> TriggerAnimation;
+    public static event Action<SwipeableObject, SwipeableObject> CalculateAnimationData;
 
-    private void Update()
-    {
-        //if (_stackToMove != null)
-            _onPerformMovement?.Invoke();
-    }
+    private void Awake() => SwipesManager.TriggerSwipeableObjMoevement += StartPerformingMovement;
+
+    private void Update() => _onPerformMovement?.Invoke();
 
     public void InitializeObject()
     {
@@ -43,39 +37,19 @@ public class SwipeableObject : MonoBehaviour
     {
         if (from == Data.This)
         {
-            //Debug.Log($"row: {Data.Row}, column: {Data.Column}");
             _stackToMove = from.Data.Stack;
             _landingPoint = GetLandingPoint(from, to);
-            //_rotationAxis = GetRotationAxis(from, to);
             _rotationPivot.position = GetRotationPivotPosition(from, to);
             _rotationPivot.rotation = Quaternion.identity;
             from.Data.Stack.transform.parent = _rotationPivot;
             if (NeedAlignment(from, to))
                 _onPerformMovement = AligneWithRotationPivot;
             else _onPerformMovement = Rotate;
-            //Debug.Log("From: " + from.Data.StackCount);
-            //Debug.Log("To: " + to.Data.StackCount);
-            //Debug.Log(GetRotationAxis(from, to));
             TransferData(from, to);
         }
     }
 
-    #region DEPRECATO
 
-
-    
-
-    private void PerformMovement()
-    {
-        //_stackToMove.transform.position = _landingPoint;
-        //_stackToMove.transform.rotation *= Quaternion.Euler(180f, 0f, 0f);
-        //OnSwipeableObjMovementEnded?.Invoke();
-        //_stackToMove = null;
-        _onPerformMovement?.Invoke();
-
-
-
-    }
 
     private void AligneWithRotationPivot()
     {
@@ -105,7 +79,6 @@ public class SwipeableObject : MonoBehaviour
         {
             _stackToMove.transform.position = _landingPoint;
             _stackToMove.transform.parent = _newParent;
-            //_stackToMove = null;
             _onPerformMovement = null;
             OnSwipeableObjMovementEnded?.Invoke();
         }
@@ -137,19 +110,9 @@ public class SwipeableObject : MonoBehaviour
         }
     }
 
-    //private Vector3 GetRotationAxis(SwipeableObject from, SwipeableObject to)
-    //{
-    //    Vector3 rotationAxis;
-    //    if (from.Data.Row == to.Data.Row)
-    //        rotationAxis = (from.Data.Column < to.Data.Column) ? Vector3.back : Vector3.forward;
-    //    else rotationAxis = (from.Data.Row < to.Data.Row) ? Vector3.right : Vector3.left;
-
-    //    return rotationAxis;
-    //}
-
     private bool NeedAlignment(SwipeableObject from, SwipeableObject to) => from.Data.StackCount < to.Data.StackCount;
 
-    #endregion
+
 
 
     private Vector3 GetLandingPoint(SwipeableObject from, SwipeableObject to)
@@ -161,11 +124,8 @@ public class SwipeableObject : MonoBehaviour
 
     private void TransferData(SwipeableObject from, SwipeableObject to)
     {
-        //from.Data.Stack.transform.parent = to.Data.Stack.transform;
         _newParent = to.Data.Stack.transform;
-        //to.Data.StackCount += GetChildCount(from.Data.Stack.transform, 1);
         to.Data.StackCount += GetStackCount(from.Data.Stack.transform.position);
-        //Debug.Log("To: " + to.Data.StackCount);
         from.Data.Stack = null;
         from.Data.StackCount = 0;
         from.Data.This = null;

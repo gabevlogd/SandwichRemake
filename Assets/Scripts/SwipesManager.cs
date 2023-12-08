@@ -17,6 +17,7 @@ public class SwipesManager : MonoBehaviour
         _camera = Camera.main;
         _grid = GridHandler.Grid;
         SwipeableObject.OnSwipeableObjMovementEnded += ResetSwipes;
+        StacksAnimator.AnimationEnded += ResetSwipes;
     }
 
     private void Update() => SwipesCheck();
