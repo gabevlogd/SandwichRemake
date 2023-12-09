@@ -5,12 +5,13 @@ using UnityEngine;
 public class LevelLoader : MonoBehaviour
 {
     [SerializeField]
-    private LevelData _levelToLoad;
+    public static LevelData LevelToLoad;
     private Grid<SwipeableObjectData> _grid;
 
     private void Awake()
     {
-        GridHandler.CreateGrid(_levelToLoad.GridHeight, _levelToLoad.GridWidth, 1);
+        LevelToLoad = Resources.Load<LevelData>("TestLevel");
+        GridHandler.CreateGrid(LevelToLoad.GridHeight, LevelToLoad.GridWidth, 1);
         _grid = GridHandler.Grid;
         SpawnSwipeableObjects();
     }
@@ -18,17 +19,17 @@ public class LevelLoader : MonoBehaviour
     private void SpawnSwipeableObjects()
     {
         
-        foreach(Vector2Int coo in _levelToLoad.SpawnCoordinates)
+        foreach(Vector2Int coo in LevelToLoad.SpawnCoordinates)
         {
             SwipeableObjectData newSwipeableData = _grid.GetGridObject(coo.x, coo.y);
             if (AreEdgeCoordinates(newSwipeableData.Row, newSwipeableData.Column)) newSwipeableData.Edge = true;
-            SwipeableObject newSwipeable = Instantiate(_levelToLoad.SwipeableObjectPrefab, _grid.GetWorldPosition(newSwipeableData.Column, newSwipeableData.Row), Quaternion.identity);
+            SwipeableObject newSwipeable = Instantiate(LevelToLoad.SwipeableObjectPrefab, _grid.GetWorldPosition(newSwipeableData.Column, newSwipeableData.Row), Quaternion.identity);
             newSwipeable.Data = newSwipeableData;
             newSwipeable.InitializeObject();
         }
     }
 
-    private bool AreEdgeCoordinates(int row, int column) => (row == _levelToLoad.HeadCoordinates.x && column == _levelToLoad.HeadCoordinates.y) || (row == _levelToLoad.BottomCoordinates.x && column == _levelToLoad.BottomCoordinates.y);
+    private bool AreEdgeCoordinates(int row, int column) => (row == LevelToLoad.HeadCoordinates.x && column == LevelToLoad.HeadCoordinates.y) || (row == LevelToLoad.BottomCoordinates.x && column == LevelToLoad.BottomCoordinates.y);
 
 
 

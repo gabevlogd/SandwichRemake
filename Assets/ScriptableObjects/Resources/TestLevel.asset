@@ -25,3 +25,4 @@ MonoBehaviour:
   LevelIndex: 0
   GridWidth: 3
   GridHeight: 3
+  PawnNumber: 6
