@@ -2,11 +2,11 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using Gabevlogd.Patterns;
 
 public class StacksAnimator : MonoBehaviour
 {
     public static event Action AnimationEnded;
-    private Action _performAnimation;
 
     public GameObject TargetStack { get => _targetStack; }
     private GameObject _targetStack;
@@ -15,52 +15,79 @@ public class StacksAnimator : MonoBehaviour
     public Transform RotationPivot { get => _rotationPivot; }
     private Transform _rotationPivot;
 
-    public Quaternion TargetRoation { get => _targetRotation; }
+    public Quaternion TargetRotation { get => _targetRotation; }
     private Quaternion _targetRotation;
     public Vector3 StartingPoint { get => _startingPoint; }
     private Vector3 _startingPoint;
     public Vector3 FinalPoint { get => _finalPoint; }
     private Vector3 _finalPoint;
 
+    public float Speed { get => _speed; }
     [SerializeField]
     private float _speed;
+    public float AngularSpeed { get => _angularSpeed; }
     [SerializeField]
     private float _angularSpeed;
     private float _singleStackHeight;
-    private bool _isReversed;
+
+
+    private StateMachine<StacksAnimator> _stateMachine;
+    public readonly SleepState Sleep = new SleepState(Constants.SLEEP);
+    public readonly StackMoveState StackMove = new StackMoveState(Constants.STACK_MOVE);
+    public readonly InvalidStackMoveState InvalidStackMove = new InvalidStackMoveState(Constants.INVALID_MOVE);
+    
 
 
     private void Awake()
     {
         _rotationPivot = transform.GetChild(0);
-        SwipeableObject.CalculateAnimationData += CalculateAnimationData;
-        SwipeableObject.TriggerAnimation += TriggerAnimation;
+        _stateMachine = new StateMachine<StacksAnimator>(this);
+        _stateMachine.AddState(Sleep);
+        _stateMachine.AddState(StackMove);
+        _stateMachine.AddState(InvalidStackMove);
+        SwipeableObject.RunAnimation += RunAnimation;
     }
 
-    private void Update() => _performAnimation?.Invoke();
+    private void Start() => _stateMachine.RunStateMachine(Sleep);
 
-    private void CalculateAnimationData(SwipeableObject from, SwipeableObject to)
+    private void Update() => _stateMachine.CurrentState.OnUpdate(this);
+
+    private void CalculateAnimationData(string animation, SwipeableObject from, SwipeableObject to)
     {
         //get stack to move
         _targetStack = from.Data.Stack;
-        _originalParent = to.Data.Stack.transform;
+        if (animation == InvalidStackMove.StateID)
+            _originalParent = from.Data.Stack.transform.parent;
+        else _originalParent = to.Data.Stack.transform;
         //get the height of the single element of a stack
         _singleStackHeight = _targetStack.transform.lossyScale.y;
         _rotationPivot.position = GetRotationPivotPosition(from, to);
-        _targetRotation = GetTargetRotation(false);
+        _targetRotation = GetTargetRotation();
         //get the first position which to traslate the stack
         _startingPoint = GetStartingPoint(from, to);
         //get the last position which to traslate the stack
         _finalPoint = GetFinalPoint(from, to);
     }
 
-    private void TriggerAnimation(bool reverse)
+    public void RunAnimation(string animation, SwipeableObject from, SwipeableObject to)
     {
-        TMP2 = _targetStack.transform.position;
-        _targetStack.transform.parent = _rotationPivot;
-        _isReversed = reverse;
-        _performAnimation = PerformStepA;
+        StateBase<StacksAnimator> animationToTrigger = null;
+        foreach(var state in _stateMachine.StateList)
+        {
+            if (animation != state.StateID) continue;
+            animationToTrigger = state;
+        }
+        if (animationToTrigger == null)
+        {
+            Debug.LogError("Invalid animation");
+            return;
+        }
+
+        CalculateAnimationData(animation, from, to);
+        _stateMachine.ChangeState(animationToTrigger);
     }
+
+    public void AnimationCompleted() => AnimationEnded?.Invoke();
 
     private Vector3 GetRotationPivotPosition(SwipeableObject from, SwipeableObject to)
     {
@@ -87,22 +114,18 @@ public class StacksAnimator : MonoBehaviour
         }
     }
 
-    private Quaternion GetTargetRotation(bool reverse)
+    private Quaternion GetTargetRotation()
     {
         switch (SwipesManager.SwipeDirection)
         {
             case SwipeDirection.Up:
-                if (reverse) return Quaternion.Euler(180f, 0f, 0f);
-                else return Quaternion.Euler(-180f, 0f, 0f);
+                return Quaternion.Euler(-180f, 0f, 0f);
             case SwipeDirection.Down:
-                if (reverse) return Quaternion.Euler(-180f, 0f, 0f);
-                else return Quaternion.Euler(180f, 0f, 0f);
+                return Quaternion.Euler(180f, 0f, 0f);
             case SwipeDirection.Right:
-                if (reverse) return Quaternion.Euler(0f, 0f, - 180f);
-                else return Quaternion.Euler(0f, 0f, 180f);
+                return Quaternion.Euler(0f, 0f, 180f);
             case SwipeDirection.Left:
-                if (reverse) return Quaternion.Euler(0f, 0f, 180f);
-                else return Quaternion.Euler(0f, 0f, -180f);
+                return Quaternion.Euler(0f, 0f, -180f);
             default:
                 return Quaternion.identity;
         }
@@ -119,60 +142,5 @@ public class StacksAnimator : MonoBehaviour
             return from.Data.Stack.transform.position;
         else
             return from.Data.Stack.transform.position + Vector3.up * (_singleStackHeight * (to.Data.StackCount - from.Data.StackCount));
-    }
-
-    private void PerformStepA()
-    {
-        if (Vector3.Distance(_targetStack.transform.position, _startingPoint) > 0.01f)
-            _targetStack.transform.position = Vector3.MoveTowards(_targetStack.transform.position, _startingPoint, Time.deltaTime * _speed);
-        else
-        {
-            _targetStack.transform.position = _startingPoint;
-            _performAnimation = PerformStepB;
-        }
-    }
-
-    Vector3 TMP;
-    Vector3 TMP2;
-    private void PerformStepB()
-    {
-        if (Quaternion.Dot(_rotationPivot.rotation, _targetRotation) < 0.99f)
-            _rotationPivot.rotation = Quaternion.RotateTowards(_rotationPivot.rotation, _targetRotation, Time.deltaTime * _angularSpeed * 100);
-        else
-        {
-            _rotationPivot.rotation = _targetRotation;
-            TMP = _targetStack.transform.position;
-            _performAnimation = PerformStepC;
-        }
-    }
-
-    private void PerformStepC()
-    {
-        if (Vector3.Distance(_targetStack.transform.position, _finalPoint) > 0.01f)
-            _targetStack.transform.position = Vector3.MoveTowards(_targetStack.transform.position, _finalPoint, Time.deltaTime * _speed);
-        else if (_isReversed)
-        {
-            ReverseAnimationData();
-            _performAnimation = PerformStepA;
-        }
-        else
-        {
-            _targetStack.transform.parent = _originalParent;
-            _performAnimation = null;
-            AnimationEnded?.Invoke();
-        }
-    }
-
-    private void ReverseAnimationData() 
-    {
-        //Vector3 tmp = _targetPositionB;
-        Debug.Log("before B: " + _finalPoint);
-        _finalPoint = TMP2;
-        Debug.Log("after B: " + _finalPoint);
-        Debug.Log("before A: " + _startingPoint);
-        _startingPoint = TMP;
-        Debug.Log("after A: " + _startingPoint);
-        _targetRotation = GetTargetRotation(true);
-        _isReversed = false;
     }
 }

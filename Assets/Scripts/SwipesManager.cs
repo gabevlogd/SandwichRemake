@@ -18,6 +18,7 @@ public class SwipesManager : MonoBehaviour
         _camera = Camera.main;
         _grid = GridHandler.Grid;
         StacksAnimator.AnimationEnded += ResetSwipes;
+
     }
 
     private void Update() => SwipesCheck();
@@ -35,14 +36,11 @@ public class SwipesManager : MonoBehaviour
                 TryCacheSwipeData(touch, out _start);
                 break;
             case TouchPhase.Ended:
-                if (_start != null)
-                {
-                    //TryCacheSwipeData(touch, out _end);
-                    _end = GetNeighbour(touch);
-                    if (_end != null)
-                        TriggerStackMoevement?.Invoke(_start, _end);
-                    else ResetSwipes();
-                }
+
+                if (_start == null) return;
+                _end = GetNeighbour(touch);
+                if (_end != null) TriggerStackMoevement?.Invoke(_start, _end);
+                else ResetSwipes();
 
                 break;
             default:

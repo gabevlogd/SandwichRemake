@@ -7,8 +7,7 @@ public class SwipeableObject : MonoBehaviour
 {
     public SwipeableObjectData Data;
 
-    public static event Action<bool> TriggerAnimation;
-    public static event Action<SwipeableObject, SwipeableObject> CalculateAnimationData;
+    public static event Action<string, SwipeableObject, SwipeableObject> RunAnimation;
 
     private void Awake() => SwipesManager.TriggerStackMoevement += TryMoveStack;
 
@@ -23,9 +22,10 @@ public class SwipeableObject : MonoBehaviour
     {
         if (from == Data.This)
         {
-            CalculateAnimationData?.Invoke(from, to);
-            TransferData(from, to);
-            TriggerAnimation?.Invoke(false);
+            //CalculateAnimationData?.Invoke(from, to);
+            RunAnimation?.Invoke(Constants.INVALID_MOVE, from, to);
+            //TransferData(from, to);
+            //RunAnimation?.Invoke(false);
         }
     }
 
