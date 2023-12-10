@@ -7,6 +7,7 @@ using Gabevlogd.Patterns;
 public class StacksAnimator : MonoBehaviour
 {
     public static event Action AnimationEnded;
+    public static event Action<SwipeableObject, SwipeableObject, Vector3> RegisterMove;
 
     public GameObject TargetStack { get => _targetStack; }
     private GameObject _targetStack;
@@ -46,6 +47,7 @@ public class StacksAnimator : MonoBehaviour
         _stateMachine.AddState(StackMove);
         _stateMachine.AddState(InvalidStackMove);
         SwipeableObject.RunAnimation += RunAnimation;
+        UndoManager.RunAnimation += RunAnimation;
     }
 
     private void Start() => _stateMachine.RunStateMachine(Sleep);
@@ -67,9 +69,10 @@ public class StacksAnimator : MonoBehaviour
         _startingPoint = GetStartingPoint(from, to);
         //get the last position which to traslate the stack
         _finalPoint = GetFinalPoint(from, to);
+        if (animation == Constants.STACK_MOVE) RegisterMove?.Invoke(from, to, _rotationPivot.position);
     }
 
-    public void RunAnimation(string animation, SwipeableObject from, SwipeableObject to)
+    private void RunAnimation(string animation, SwipeableObject from, SwipeableObject to)
     {
         StateBase<StacksAnimator> animationToTrigger = null;
         foreach(var state in _stateMachine.StateList)
@@ -87,6 +90,17 @@ public class StacksAnimator : MonoBehaviour
         _stateMachine.ChangeState(animationToTrigger);
     }
 
+    private void RunAnimation(Transform parent, GameObject targetStack, Quaternion targetRotation, Vector3 pivotPosition, Vector3 startingPoint, Vector3 finalPoint)
+    {
+        _rotationPivot.SetPositionAndRotation(pivotPosition, Quaternion.identity);
+        _targetStack = targetStack;
+        _originalParent = parent;
+        _targetRotation = targetRotation;
+        _startingPoint = startingPoint;
+        _finalPoint = finalPoint;
+        _stateMachine.ChangeState(StackMove);
+    }
+
     public void AnimationCompleted() => AnimationEnded?.Invoke();
 
     private Vector3 GetRotationPivotPosition(SwipeableObject from, SwipeableObject to)
@@ -99,36 +113,26 @@ public class StacksAnimator : MonoBehaviour
             rotationPivotY = _singleStackHeight * to.Data.StackCount;
         else rotationPivotY = _singleStackHeight * from.Data.StackCount;
 
-        switch (SwipesManager.SwipeDirection)
+        return SwipesManager.SwipeDirection switch
         {
-            case SwipeDirection.Up:
-                return new Vector3(from.transform.position.x, rotationPivotY, from.transform.position.z + GridHandler.Grid.GetCellSize() * 0.5f);
-            case SwipeDirection.Down:
-                return new Vector3(from.transform.position.x, rotationPivotY, from.transform.position.z - GridHandler.Grid.GetCellSize() * 0.5f);
-            case SwipeDirection.Right:
-                return new Vector3(from.transform.position.x + GridHandler.Grid.GetCellSize() * 0.5f, rotationPivotY, from.transform.position.z);
-            case SwipeDirection.Left:
-                return new Vector3(from.transform.position.x - GridHandler.Grid.GetCellSize() * 0.5f, rotationPivotY, from.transform.position.z);
-            default:
-                return Vector3.zero;
-        }
+            SwipeDirection.Up => new Vector3(from.transform.position.x, rotationPivotY, from.transform.position.z + GridHandler.Grid.GetCellSize() * 0.5f),
+            SwipeDirection.Down => new Vector3(from.transform.position.x, rotationPivotY, from.transform.position.z - GridHandler.Grid.GetCellSize() * 0.5f),
+            SwipeDirection.Right => new Vector3(from.transform.position.x + GridHandler.Grid.GetCellSize() * 0.5f, rotationPivotY, from.transform.position.z),
+            SwipeDirection.Left => new Vector3(from.transform.position.x - GridHandler.Grid.GetCellSize() * 0.5f, rotationPivotY, from.transform.position.z),
+            _ => Vector3.zero,
+        };
     }
 
     private Quaternion GetTargetRotation()
     {
-        switch (SwipesManager.SwipeDirection)
+        return SwipesManager.SwipeDirection switch
         {
-            case SwipeDirection.Up:
-                return Quaternion.Euler(-180f, 0f, 0f);
-            case SwipeDirection.Down:
-                return Quaternion.Euler(180f, 0f, 0f);
-            case SwipeDirection.Right:
-                return Quaternion.Euler(0f, 0f, 180f);
-            case SwipeDirection.Left:
-                return Quaternion.Euler(0f, 0f, -180f);
-            default:
-                return Quaternion.identity;
-        }
+            SwipeDirection.Up => Quaternion.Euler(-180f, 0f, 0f),
+            SwipeDirection.Down => Quaternion.Euler(180f, 0f, 0f),
+            SwipeDirection.Right => Quaternion.Euler(0f, 0f, 180f),
+            SwipeDirection.Left => Quaternion.Euler(0f, 0f, -180f),
+            _ => Quaternion.identity,
+        };
     }
 
     private Vector3 GetFinalPoint(SwipeableObject from, SwipeableObject to)

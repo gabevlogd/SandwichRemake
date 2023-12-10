@@ -66,13 +66,14 @@ public class SwipeableObject : MonoBehaviour
 
     private void TransferData(SwipeableObject from, SwipeableObject to)
     {
-        to.Data.StackCount += GetStackCount(from.Data.Stack.transform.position);
+        //to.Data.StackCount += GetStackCount(from.Data.Stack.transform.position);
+        to.Data.StackCount += from.Data.StackCount;
         from.Data.Stack = null;
         from.Data.StackCount = 0;
         from.Data.This = null;
     }
 
-    private int GetStackCount(Vector3 bottom) => Physics.RaycastAll(bottom, Vector3.up).Length + 1;
+    //private int GetStackCount(Vector3 bottom) => Physics.RaycastAll(bottom, Vector3.up).Length + 1;
     
 }
 
