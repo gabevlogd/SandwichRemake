@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using TMPro;
 
 public class HUD : UIWindow
 {
@@ -16,6 +17,8 @@ public class HUD : UIWindow
     private Button _undoButton;
     [SerializeField]
     private Button _pauseButton;
+    [SerializeField]
+    private TextMeshProUGUI _levelIndexText;
 
     private void OnEnable()
     {
@@ -23,6 +26,8 @@ public class HUD : UIWindow
         _restartButton.onClick.AddListener(() => PerformRestart?.Invoke());
         _pauseButton.onClick.AddListener(() => PerformPause?.Invoke());
     }
+
+    private void Start() => LevelLoader.LevelLoaded += (LevelData levelLoaded) => _levelIndexText.text = $"Level {levelLoaded.LevelIndex + 1}";
 
     private void OnDisable()
     {

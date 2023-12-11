@@ -759,6 +759,7 @@ MonoBehaviour:
   _restartButton: {fileID: 927319263}
   _undoButton: {fileID: 488655611}
   _pauseButton: {fileID: 1627050963}
+  _levelIndexText: {fileID: 1985841493}
 --- !u!1 &705507993
 GameObject:
   m_ObjectHideFlags: 0

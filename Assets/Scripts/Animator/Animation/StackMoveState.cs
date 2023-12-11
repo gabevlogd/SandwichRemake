@@ -45,6 +45,8 @@ public class StackMoveState : StateBase<StacksAnimator>
     }
     private void StepB(StacksAnimator context)
     {
+        //if (Quaternion.Dot(context.TargetStack.transform.rotation, context.TargetRotation) < 0.99f)
+        //    context.TargetStack.transform.RotateAround(context.RotationPivot.position, Vector3.right, Time.deltaTime * context.AngularSpeed * 100f);
         if (Quaternion.Dot(context.RotationPivot.rotation, context.TargetRotation) < 0.99f)
             context.RotationPivot.rotation = Quaternion.RotateTowards(context.RotationPivot.rotation, context.TargetRotation, Time.deltaTime * context.AngularSpeed * 100);
         else
