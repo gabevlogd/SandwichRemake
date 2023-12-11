@@ -12,5 +12,4 @@ public class LevelData : ScriptableObject
     public int LevelIndex;
     public int GridWidth;
     public int GridHeight;
-    public int PawnNumber;
 }

@@ -6,10 +6,23 @@ using UnityEngine;
 public class SwipeableObject : MonoBehaviour
 {
     public static event Action<string, SwipeableObject, SwipeableObject> RunAnimation;
+    public static event Action GameWon;
     public SwipeableObjectData Data;
     private static int _lastSkin = 0;
+    private int _slicesNumber;
 
-    private void Awake() => SwipesManager.TriggerStackMoevement += TryMoveStack;
+    private void OnEnable()
+    {
+        SwipesManager.TriggerStackMoevement += TryMoveStack;
+        LevelLoader.LevelLoaded += SetSlicesNumber;
+        WinState.LoadNextLevel += DestroyItself;
+    }
+    private void OnDisable()
+    {
+        SwipesManager.TriggerStackMoevement -= TryMoveStack;
+        LevelLoader.LevelLoaded -= SetSlicesNumber;
+        WinState.LoadNextLevel -= DestroyItself;
+    }
 
     private void OnDestroy() => Resources.UnloadUnusedAssets();
 
@@ -39,18 +52,19 @@ public class SwipeableObject : MonoBehaviour
         }
     }
 
-    public void TryMoveStack(SwipeableObject from, SwipeableObject to)
+    private void TryMoveStack(SwipeableObject from, SwipeableObject to)
     {
         if (from == Data.This)
         {
             if (from.Data.Edge && to.Data.Edge)
             {
-                if (from.Data.StackCount + to.Data.StackCount != LevelLoader.LevelToLoad.PawnNumber)
+                if (from.Data.StackCount + to.Data.StackCount != _slicesNumber)
                     RunAnimation?.Invoke(Constants.INVALID_MOVE, from, to);
                 else
                 {
                     Debug.Log("WIN");
                     RunAnimation?.Invoke(Constants.STACK_MOVE, from, to);
+                    GameWon?.Invoke();
                 }
             }
             else if (from.Data.Edge)
@@ -63,17 +77,18 @@ public class SwipeableObject : MonoBehaviour
         }
     }
 
+    private void SetSlicesNumber(LevelData levelData) => _slicesNumber = levelData.SpawnCoordinates.Count;
+
 
     private void TransferData(SwipeableObject from, SwipeableObject to)
     {
-        //to.Data.StackCount += GetStackCount(from.Data.Stack.transform.position);
         to.Data.StackCount += from.Data.StackCount;
         from.Data.Stack = null;
         from.Data.StackCount = 0;
         from.Data.This = null;
     }
 
-    //private int GetStackCount(Vector3 bottom) => Physics.RaycastAll(bottom, Vector3.up).Length + 1;
+    private void DestroyItself(int value) => Destroy(gameObject);
     
 }
 

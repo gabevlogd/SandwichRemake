@@ -9,8 +9,9 @@ public class SleepState : StateBase<StacksAnimator>
     {
     }
 
-    public override void OnUpdate(StacksAnimator context)
+    public override void OnEnter(StacksAnimator context)
     {
-        //base.OnUpdate(context);
+        base.OnEnter(context);
+        context.AnimationCompleted();
     }
 }

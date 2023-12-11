@@ -5,7 +5,6 @@ using UnityEngine;
 
 public struct InverseMove 
 {
-    public static event Action TriggerInverseMove;
     public SwipeableObject Itself;
     public SwipeableObject CameFrom;
     public Transform Parent;
@@ -28,6 +27,4 @@ public struct InverseMove
         FinalPoint = itself.Data.Stack.transform.position;
         RotationPivotPosition = rotationPivotPosition;
     }
-
-    public void Trigger() => TriggerInverseMove?.Invoke();
 }

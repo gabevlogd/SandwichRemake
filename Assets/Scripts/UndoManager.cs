@@ -13,9 +13,10 @@ public class UndoManager : MonoBehaviour
     private void Awake()
     {
         _inverseMovesList = new List<InverseMove>();
-        _canPerformUndo = true;
         StacksAnimator.RegisterMove += RegisterMove;
         StacksAnimator.AnimationEnded += () => _canPerformUndo = true;
+        HUD.PerformUndo += UndoLastMove;
+        LevelLoader.LevelLoaded += (LevelData value) => _inverseMovesList = new List<InverseMove>();
     }
 
 

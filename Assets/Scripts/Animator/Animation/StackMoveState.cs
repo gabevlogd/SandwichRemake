@@ -30,7 +30,7 @@ public class StackMoveState : StateBase<StacksAnimator>
         base.OnExit(context);
         context.TargetStack.transform.parent = context.OriginalParent;
         _performAnimation = null;
-        context.AnimationCompleted();
+        //context.AnimationCompleted();
     }
 
     private void StepA(StacksAnimator context)

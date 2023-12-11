@@ -13,13 +13,16 @@ public class SwipesManager : MonoBehaviour
     public static event Action<SwipeableObject, SwipeableObject> TriggerStackMoevement;
     public static SwipeDirection SwipeDirection;
 
-    private void Awake()
-    {
-        _camera = Camera.main;
-        _grid = GridHandler.Grid;
-        StacksAnimator.AnimationEnded += ResetSwipes;
+    private void Awake() => _camera = Camera.main;
 
+    private void OnEnable()
+    {
+        _grid = GridHandler.Grid;
+        ResetSwipes();
+        StacksAnimator.AnimationEnded += ResetSwipes;
     }
+
+    private void OnDisable() => StacksAnimator.AnimationEnded -= ResetSwipes;
 
     private void Update() => SwipesCheck();
 
@@ -66,17 +69,17 @@ public class SwipesManager : MonoBehaviour
             pointedObj = _grid.GetGridObject(_start.Data.Column + 1, _start.Data.Row);
             SwipeDirection = SwipeDirection.Right;
         }
-        if (Vector3.Dot(swipeDirection, Vector3.left) > 0.8f)
+        else if (Vector3.Dot(swipeDirection, Vector3.left) > 0.8f)
         {
             pointedObj = _grid.GetGridObject(_start.Data.Column - 1, _start.Data.Row);
             SwipeDirection = SwipeDirection.Left;
         }
-        if ((Vector3.Dot(swipeDirection, Vector3.forward) > 0.8f))
+        else if ((Vector3.Dot(swipeDirection, Vector3.forward) > 0.8f))
         {
             pointedObj = _grid.GetGridObject(_start.Data.Column, _start.Data.Row + 1);
             SwipeDirection = SwipeDirection.Up;
         }
-        if ((Vector3.Dot(swipeDirection, Vector3.back) > 0.8f))
+        else if ((Vector3.Dot(swipeDirection, Vector3.back) > 0.8f))
         {
             pointedObj = _grid.GetGridObject(_start.Data.Column, _start.Data.Row - 1);
             SwipeDirection = SwipeDirection.Down;
