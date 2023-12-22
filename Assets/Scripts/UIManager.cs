@@ -23,9 +23,9 @@ public class UIManager : MonoBehaviour
     public void ChangeWindow(UIWindow windowToOpen)
     {
         if (_current != null)
-            _current.gameObject.SetActive(false);
+            _current.Disable();
         _current = windowToOpen;
-        _current.gameObject.SetActive(true);
+        _current.Enable();
     }
 
 }

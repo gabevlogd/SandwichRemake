@@ -88,7 +88,7 @@ public class SwipeableObject : MonoBehaviour
         from.Data.This = null;
     }
 
-    private void DestroyItself(int value) => Destroy(gameObject);
+    private void DestroyItself() => Destroy(gameObject);
     
 }
 

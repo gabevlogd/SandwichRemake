@@ -25,14 +25,20 @@ public class HUD : UIWindow
         _undoButton.onClick.AddListener(() => PerformUndo?.Invoke());
         _restartButton.onClick.AddListener(() => PerformRestart?.Invoke());
         _pauseButton.onClick.AddListener(() => PerformPause?.Invoke());
+        LevelLoader.LevelLoaded += UpdateLevelIndex;
     }
-
-    private void Start() => LevelLoader.LevelLoaded += (LevelData levelLoaded) => _levelIndexText.text = $"Level {levelLoaded.LevelIndex + 1}";
 
     private void OnDisable()
     {
         _undoButton.onClick.RemoveAllListeners();
         _restartButton.onClick.RemoveAllListeners();
         _pauseButton.onClick.RemoveAllListeners();
+        LevelLoader.LevelLoaded -= UpdateLevelIndex;
+    }
+
+    private void UpdateLevelIndex(LevelData levelLoaded)
+    {
+        Debug.Log(levelLoaded.LevelIndex);
+        _levelIndexText.text = $"Level {levelLoaded.LevelIndex + 1}";
     }
 }

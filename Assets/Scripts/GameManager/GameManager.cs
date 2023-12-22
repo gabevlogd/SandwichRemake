@@ -15,8 +15,8 @@ public class GameManager : MonoBehaviour
     public PlayState Play;
     public WinState Win;
 
-    public int CurrentLevelIndex { get => _currentLevelIndex; }
-    private int _currentLevelIndex;
+    //public int CurrentLevelIndex { get => _currentLevelIndex; }
+    //private int _currentLevelIndex;
 
     private void Awake()
     {
@@ -30,7 +30,7 @@ public class GameManager : MonoBehaviour
     {
         HUD.PerformPause += () => _stateMachine.ChangeState(Pause);
         SwipeableObject.GameWon += () => _stateMachine.ChangeState(Win);
-        LevelLoader.LevelLoaded += (LevelData data) => _currentLevelIndex = data.LevelIndex;
+        //LevelLoader.LevelLoaded += (LevelData data) => _currentLevelIndex = data.LevelIndex;
     }
 
     private void Update() => _stateMachine.CurrentState.OnUpdate(this);

@@ -6,7 +6,7 @@ using UnityEngine;
 
 public class WinState : StateBase<GameManager>
 {
-    public static event Action<int> LoadNextLevel;
+    public static event Action LoadNextLevel;
 
     public WinState(string stateID, StateMachine<GameManager> stateMachine) : base(stateID, stateMachine)
     {
@@ -28,7 +28,7 @@ public class WinState : StateBase<GameManager>
     public override void OnExit(GameManager context)
     {
         base.OnExit(context);
-        LoadNextLevel?.Invoke(context.CurrentLevelIndex + 1);
+        LoadNextLevel?.Invoke();
     }
 
     private void CheckNextLevelInput(GameManager context)
