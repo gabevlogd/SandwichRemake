@@ -23,8 +23,11 @@ public class HUD : UIWindow
     private void OnEnable()
     {
         _undoButton.onClick.AddListener(() => PerformUndo?.Invoke());
+        _undoButton.onClick.AddListener(() => SoundManager.Play(Constants.BUTTON));
         _restartButton.onClick.AddListener(() => PerformRestart?.Invoke());
+        _restartButton.onClick.AddListener(() => SoundManager.Play(Constants.BUTTON));
         _pauseButton.onClick.AddListener(() => PerformPause?.Invoke());
+        _pauseButton.onClick.AddListener(() => SoundManager.Play(Constants.BUTTON));
         LevelLoader.LevelLoaded += UpdateLevelIndex;
     }
 

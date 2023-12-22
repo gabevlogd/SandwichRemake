@@ -8,15 +8,22 @@ public class UndoManager : MonoBehaviour
     public static event Action<Transform, GameObject, Quaternion, Vector3, Vector3, Vector3> RunAnimation;
     private List<InverseMove> _inverseMovesList;
     private bool _canPerformUndo;
+    private bool _undoAll;
 
 
     private void Awake()
     {
         _inverseMovesList = new List<InverseMove>();
         StacksAnimator.RegisterMove += RegisterMove;
-        StacksAnimator.AnimationEnded += () => _canPerformUndo = true;
+        StacksAnimator.AnimationEnded += RestoreUndo;
         HUD.PerformUndo += UndoLastMove;
-        LevelLoader.LevelLoaded += (LevelData value) => _inverseMovesList = new List<InverseMove>();
+        HUD.PerformRestart += RestartLevel;
+        LevelLoader.LevelLoaded += ResetUndoData;
+    }
+
+    private void Update()
+    {
+        if (_undoAll) UndoAll();
     }
 
 
@@ -32,6 +39,17 @@ public class UndoManager : MonoBehaviour
         tmp.CameFrom.Data.StackCount -= tmp.StackCount;
         _inverseMovesList.RemoveAt(_inverseMovesList.Count - 1);
     }
+
+    public void UndoAll()
+    {
+        if (_canPerformUndo)
+        {
+            UndoLastMove();
+            if (_inverseMovesList.Count == 0)
+                _undoAll = false;
+        }
+    }
+
 
     private void RegisterMove(SwipeableObject from, SwipeableObject to, Vector3 pivotPosition)
     {
@@ -58,4 +76,9 @@ public class UndoManager : MonoBehaviour
             _ => Quaternion.identity,
         };
     }
+
+    private void RestartLevel() => _undoAll = true;
+    private void RestoreUndo() => _canPerformUndo = true;
+
+    private void ResetUndoData(LevelData value) => _inverseMovesList = new List<InverseMove>();
 }

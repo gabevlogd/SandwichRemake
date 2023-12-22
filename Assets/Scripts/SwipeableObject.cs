@@ -6,6 +6,7 @@ using UnityEngine;
 public class SwipeableObject : MonoBehaviour
 {
     public static event Action<string, SwipeableObject, SwipeableObject> RunAnimation;
+    public static event Action<Vector3> TriggerCamera;
     public static event Action GameWon;
     public SwipeableObjectData Data;
     private static int _lastSkin = 0;
@@ -62,7 +63,9 @@ public class SwipeableObject : MonoBehaviour
                     RunAnimation?.Invoke(Constants.INVALID_MOVE, from, to);
                 else
                 {
-                    Debug.Log("WIN");
+                    Debug.Log("WON");
+                    SoundManager.Play(Constants.WON);
+                    TriggerCamera?.Invoke(new Vector3(to.transform.position.x, transform.position.y + 5, transform.position.z - 3f));
                     RunAnimation?.Invoke(Constants.STACK_MOVE, from, to);
                     GameWon?.Invoke();
                 }

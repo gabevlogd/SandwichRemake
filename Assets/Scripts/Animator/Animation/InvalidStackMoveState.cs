@@ -15,6 +15,7 @@ public class InvalidStackMoveState : StateBase<StacksAnimator>
     public override void OnEnter(StacksAnimator context)
     {
         base.OnEnter(context);
+        SoundManager.Play(Constants.SWIPE);
         context.TargetStack.transform.parent = context.RotationPivot;
         _point2 = context.TargetStack.transform.position;
         _performAnimation = StepA;
@@ -29,6 +30,7 @@ public class InvalidStackMoveState : StateBase<StacksAnimator>
     public override void OnExit(StacksAnimator context)
     {
         base.OnExit(context);
+        SoundManager.Play(Constants.SLICE);
         context.TargetStack.transform.parent = context.OriginalParent;
         _performAnimation = null;
         //context.AnimationCompleted();
@@ -62,6 +64,7 @@ public class InvalidStackMoveState : StateBase<StacksAnimator>
             context.TargetStack.transform.position = Vector3.MoveTowards(context.TargetStack.transform.position, context.FinalPoint, Time.deltaTime * context.Speed);
         else
         {
+            SoundManager.Play(Constants.SLICE);
             context.TargetStack.transform.position = context.FinalPoint;
             _performAnimation = StepD;
         }

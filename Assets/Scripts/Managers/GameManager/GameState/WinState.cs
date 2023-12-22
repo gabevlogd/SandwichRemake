@@ -1,11 +1,14 @@
 using Gabevlogd.Patterns;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class PauseState : StateBase<GameManager>
+public class WinState : StateBase<GameManager>
 {
-    public PauseState(string stateID, StateMachine<GameManager> stateMachine) : base(stateID, stateMachine)
+    public static event Action LoadNextLevel;
+
+    public WinState(string stateID, StateMachine<GameManager> stateMachine) : base(stateID, stateMachine)
     {
     }
 
@@ -13,21 +16,30 @@ public class PauseState : StateBase<GameManager>
     {
         base.OnEnter(context);
         context.SwipesManager.enabled = false;
-        context.UIManager.ChangeWindow(context.UIManager.Menu);
+        context.UIManager.ChangeWindow(context.UIManager.WinHUD);
     }
 
     public override void OnUpdate(GameManager context)
     {
         //base.OnUpdate(context);
-        ChecksForResumeGame(context);
+        CheckNextLevelInput(context);
     }
 
-    private void ChecksForResumeGame(GameManager context)
+    public override void OnExit(GameManager context)
+    {
+        base.OnExit(context);
+        LoadNextLevel?.Invoke();
+    }
+
+    private void CheckNextLevelInput(GameManager context)
     {
         if (Input.touchCount == 0) return;
         Touch touch = Input.GetTouch(0);
         if (Vector2.Dot(touch.deltaPosition.normalized, Vector2.right) > 0.99f && touch.deltaPosition.magnitude > 30f)
+        {
+            SoundManager.Play(Constants.SWIPE);
             _stateMachine.ChangeState(context.Play);
+        }
     }
-
 }
+

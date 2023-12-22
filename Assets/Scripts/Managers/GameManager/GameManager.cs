@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using Gabevlogd.Patterns;
+using System;
 
 public class GameManager : MonoBehaviour
 {
@@ -15,9 +16,6 @@ public class GameManager : MonoBehaviour
     public PlayState Play;
     public WinState Win;
 
-    //public int CurrentLevelIndex { get => _currentLevelIndex; }
-    //private int _currentLevelIndex;
-
     private void Awake()
     {
         Application.targetFrameRate = 120;
@@ -28,9 +26,14 @@ public class GameManager : MonoBehaviour
 
     private void OnEnable()
     {
-        HUD.PerformPause += () => _stateMachine.ChangeState(Pause);
-        SwipeableObject.GameWon += () => _stateMachine.ChangeState(Win);
-        //LevelLoader.LevelLoaded += (LevelData data) => _currentLevelIndex = data.LevelIndex;
+        HUD.PerformPause += PauseGame;
+        SwipeableObject.GameWon += EnterWinState;
+    }
+
+    private void OnDisable()
+    {
+        HUD.PerformPause -= PauseGame;
+        SwipeableObject.GameWon -= EnterWinState;
     }
 
     private void Update() => _stateMachine.CurrentState.OnUpdate(this);
@@ -51,5 +54,8 @@ public class GameManager : MonoBehaviour
         Play = new PlayState(Constants.PLAY, _stateMachine);
         Win = new WinState(Constants.WIN, _stateMachine);
     }
+
+    private void PauseGame() => _stateMachine.ChangeState(Pause);
+    private void EnterWinState() => _stateMachine.ChangeState(Win);
 
 }

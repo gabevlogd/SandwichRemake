@@ -10,6 +10,10 @@ public static class Constants
     public static string PAUSE = "Pause";
     public static string PLAY = "Play";
     public static string WIN = "Win";
-    public static string LAST_LEVEL_INDEX;
+    public static string LAST_LEVEL_INDEX = "LevelIndex";
+    public static string WON = "Won";
+    public static string SLICE = "Slice";
+    public static string SWIPE = "Swipe";
+    public static string BUTTON = "Button";
 
 }

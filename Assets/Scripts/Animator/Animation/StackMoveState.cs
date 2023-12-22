@@ -15,6 +15,7 @@ public class StackMoveState : StateBase<StacksAnimator>
     public override void OnEnter(StacksAnimator context)
     {
         base.OnEnter(context);
+        SoundManager.Play(Constants.SWIPE);
         context.TargetStack.transform.parent = context.RotationPivot;
         _performAnimation = StepA;
     }
@@ -62,6 +63,7 @@ public class StackMoveState : StateBase<StacksAnimator>
             context.TargetStack.transform.position = Vector3.MoveTowards(context.TargetStack.transform.position, context.FinalPoint, Time.deltaTime * context.Speed);
         else
         {
+            SoundManager.Play(Constants.SLICE);
             context.TargetStack.transform.position = context.FinalPoint;
             //ChangeState(context.Sleep);
             _stateMachine.ChangeState(context.Sleep);
