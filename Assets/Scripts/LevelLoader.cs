@@ -6,29 +6,34 @@ using UnityEngine;
 public class LevelLoader : MonoBehaviour
 {
     public static event Action<LevelData> LevelLoaded;
+
     [SerializeField]
-    private List<LevelData> _levelRoster;
+    private SwipeableObject _swipeableObjectPrefab;
+    [Min(2)]
+    [SerializeField]
+    private int _gridWidth;
+    [Min(2)]
+    [SerializeField]
+    private int _gridHeight;
+
     private LevelData _levelToLoad;
     private Grid<SwipeableObjectData> _grid;
-    private static int _currentLevelIndex;
-
-    private void Awake()
-    {
-        if (_currentLevelIndex == 0) LoadLevel(0);
-    }
 
     private void OnEnable() => WinState.LoadNextLevel += LoadLevel;
+    private void OnDisable() => WinState.LoadNextLevel -= LoadLevel;
+    private void Start() => LoadLevel();
 
-    private void LoadLevel(int levelIndex)
+    private void LoadLevel()
     {
-        if (levelIndex < _levelRoster.Count)
-            _levelToLoad = _levelRoster[levelIndex];
-        else _levelToLoad = _levelRoster[0]; //restart from first level
+        int slicesNumber = UnityEngine.Random.Range(3, _gridWidth * _gridHeight);
 
-        GridHandler.CreateGrid(_levelToLoad.GridHeight, _levelToLoad.GridWidth, 1);
-        _grid = GridHandler.Grid;
+        _levelToLoad = LevelGenerator.GenerateLevel(slicesNumber, _gridWidth, _gridHeight);
+        _grid = GridHandler.CreateGrid(_levelToLoad.GridWidth, _levelToLoad.GridHeight, 1);
+
+        _levelToLoad.LevelIndex = PlayerPrefs.GetInt(Constants.LAST_LEVEL_INDEX);
+        PlayerPrefs.SetInt(Constants.LAST_LEVEL_INDEX, _levelToLoad.LevelIndex + 1);
+
         SpawnSwipeableObjects();
-        _currentLevelIndex = _levelToLoad.LevelIndex;
         LevelLoaded?.Invoke(_levelToLoad);
     }
 
@@ -39,7 +44,7 @@ public class LevelLoader : MonoBehaviour
         {
             SwipeableObjectData newSwipeableData = _grid.GetGridObject(coo.x, coo.y);
             if (AreEdgeCoordinates(newSwipeableData.Row, newSwipeableData.Column)) newSwipeableData.Edge = true;
-            SwipeableObject newSwipeable = Instantiate(_levelToLoad.SwipeableObjectPrefab, _grid.GetWorldPosition(newSwipeableData.Column, newSwipeableData.Row), Quaternion.identity);
+            SwipeableObject newSwipeable = Instantiate(_swipeableObjectPrefab, _grid.GetWorldPosition(newSwipeableData.Column, newSwipeableData.Row), Quaternion.identity);
             newSwipeable.Data = newSwipeableData;
             newSwipeable.InitializeObject();
         }
