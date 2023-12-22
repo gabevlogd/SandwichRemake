@@ -5,7 +5,7 @@ using Gabevlogd.Patterns;
 
 public class SleepState : StateBase<StacksAnimator>
 {
-    public SleepState(string stateID) : base(stateID)
+    public SleepState(string stateID, StateMachine<StacksAnimator> stateMachine) : base(stateID, stateMachine)
     {
     }
 

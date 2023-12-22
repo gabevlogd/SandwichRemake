@@ -33,24 +33,29 @@ public class StacksAnimator : MonoBehaviour
 
 
     private StateMachine<StacksAnimator> _stateMachine;
-    public readonly SleepState Sleep = new SleepState(Constants.SLEEP);
-    public readonly StackMoveState StackMove = new StackMoveState(Constants.STACK_MOVE);
-    public readonly InvalidStackMoveState InvalidStackMove = new InvalidStackMoveState(Constants.INVALID_MOVE);
+    public SleepState Sleep;
+    public StackMoveState StackMove;
+    public InvalidStackMoveState InvalidStackMove;
     
 
 
     private void Awake()
     {
         _rotationPivot = transform.GetChild(0);
-        _stateMachine = new StateMachine<StacksAnimator>(this);
-        _stateMachine.AddState(Sleep);
-        _stateMachine.AddState(StackMove);
-        _stateMachine.AddState(InvalidStackMove);
+        InitializeStateMachine();
+    }
+
+    private void OnEnable()
+    {
         SwipeableObject.RunAnimation += RunAnimation;
         UndoManager.RunAnimation += RunAnimation;
     }
 
-    private void Start() => _stateMachine.RunStateMachine(Sleep);
+    private void OnDisable()
+    {
+        SwipeableObject.RunAnimation -= RunAnimation;
+        UndoManager.RunAnimation -= RunAnimation;
+    }
 
     private void Update() => _stateMachine.CurrentState.OnUpdate(this);
 
@@ -79,6 +84,7 @@ public class StacksAnimator : MonoBehaviour
         {
             if (animation != state.StateID) continue;
             animationToTrigger = state;
+            break;
         }
         if (animationToTrigger == null)
         {
@@ -146,5 +152,22 @@ public class StacksAnimator : MonoBehaviour
             return from.Data.Stack.transform.position;
         else
             return from.Data.Stack.transform.position + Vector3.up * (_singleStackHeight * (to.Data.StackCount - from.Data.StackCount));
+    }
+
+    private void InitializeStateMachine()
+    {
+        _stateMachine = new StateMachine<StacksAnimator>(this);
+        InitializeStates();
+        _stateMachine.AddState(Sleep);
+        _stateMachine.AddState(StackMove);
+        _stateMachine.AddState(InvalidStackMove);
+        _stateMachine.RunStateMachine(Sleep, this);
+    }
+
+    private void InitializeStates()
+    {
+        Sleep = new SleepState(Constants.SLEEP, _stateMachine);
+        StackMove = new StackMoveState(Constants.STACK_MOVE, _stateMachine);
+        InvalidStackMove = new InvalidStackMoveState(Constants.INVALID_MOVE, _stateMachine);
     }
 }

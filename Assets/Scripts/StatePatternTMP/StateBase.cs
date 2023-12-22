@@ -11,11 +11,12 @@ namespace Gabevlogd.Patterns
     public class StateBase<TContext>
     {
         public string StateID;
-        public static event Action<StateBase<TContext>> OnChangeState;
+        protected StateMachine<TContext> _stateMachine;
 
-        public StateBase(string stateID)
+        public StateBase(string stateID, StateMachine<TContext> stateMachine)
         {
             StateID = stateID;
+            _stateMachine = stateMachine;
         }
 
         public virtual void OnEnter(TContext context)
@@ -33,8 +34,6 @@ namespace Gabevlogd.Patterns
         {
             Debug.Log("OnExit " + StateID);
         }
-
-        protected void ChangeState(StateBase<TContext> state) => OnChangeState?.Invoke(state);
     }
 }
 

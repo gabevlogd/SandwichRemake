@@ -9,21 +9,22 @@ namespace Gabevlogd.Patterns
     /// <typeparam name="TContext">The type of the context</typeparam>
     public class StateMachine<TContext> 
     {
-        public TContext Context;
+        public TContext _context;
         public StateBase<TContext> CurrentState;
         public StateBase<TContext> PreviousState;
         public List<StateBase<TContext>> StateList;
 
         public StateMachine(TContext context)
         {
-            Context = context;
+            _context = context;
         }
 
-        public void RunStateMachine(StateBase<TContext> entryPoint)
+        public void RunStateMachine(StateBase<TContext> entryPoint, TContext context)
         {
-            StateBase<TContext>.OnChangeState += ChangeState;
+            //StateBase<TContext>.OnChangeState += ChangeState;
+            _context = context;
             CurrentState = entryPoint;
-            CurrentState.OnEnter(Context);
+            CurrentState.OnEnter(_context);
         }
 
         public void AddState(StateBase<TContext> state)
@@ -40,9 +41,9 @@ namespace Gabevlogd.Patterns
             if (CurrentState == state) return;
 
             PreviousState = CurrentState;
-            CurrentState.OnExit(Context);
+            CurrentState.OnExit(_context);
             CurrentState = state;
-            CurrentState.OnEnter(Context);
+            CurrentState.OnEnter(_context);
         }
     }
 }

@@ -8,7 +8,7 @@ public class StackMoveState : StateBase<StacksAnimator>
 {
     private Action<StacksAnimator> _performAnimation;
 
-    public StackMoveState(string stateID) : base(stateID)
+    public StackMoveState(string stateID, StateMachine<StacksAnimator> stateMachine) : base(stateID, stateMachine)
     {
     }
 
@@ -63,7 +63,8 @@ public class StackMoveState : StateBase<StacksAnimator>
         else
         {
             context.TargetStack.transform.position = context.FinalPoint;
-            ChangeState(context.Sleep);
+            //ChangeState(context.Sleep);
+            _stateMachine.ChangeState(context.Sleep);
         }
     }
 }

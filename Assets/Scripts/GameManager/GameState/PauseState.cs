@@ -5,7 +5,7 @@ using UnityEngine;
 
 public class PauseState : StateBase<GameManager>
 {
-    public PauseState(string stateID) : base(stateID)
+    public PauseState(string stateID, StateMachine<GameManager> stateMachine) : base(stateID, stateMachine)
     {
     }
 
@@ -26,8 +26,8 @@ public class PauseState : StateBase<GameManager>
     {
         if (Input.touchCount == 0) return;
         Touch touch = Input.GetTouch(0);
-        if (Vector2.Dot(touch.deltaPosition.normalized, Vector2.right) > 0.99f)
-            ChangeState(context.Play);
+        if (Vector2.Dot(touch.deltaPosition.normalized, Vector2.right) > 0.99f && touch.deltaPosition.magnitude > 30f)
+            _stateMachine.ChangeState(context.Play);
     }
 
 }

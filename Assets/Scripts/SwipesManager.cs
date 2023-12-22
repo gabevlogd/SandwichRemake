@@ -58,6 +58,7 @@ public class SwipesManager : MonoBehaviour
         if (_grid.GetGridObject(pointedWorldPosition) != null)
             swipeData = _grid.GetGridObject(pointedWorldPosition).This;
         else swipeData = null;
+        
     }
 
     private SwipeableObject GetNeighbour(Touch touch)
@@ -66,22 +67,22 @@ public class SwipesManager : MonoBehaviour
         SwipeableObjectData pointedObj = null;
         if (Vector3.Dot(swipeDirection, Vector3.right) > 0.8f)
         {
-            pointedObj = _grid.GetGridObject(_start.Data.Column + 1, _start.Data.Row);
+            pointedObj = _grid.GetGridObject(_start.Data.Row, _start.Data.Column + 1);
             SwipeDirection = SwipeDirection.Right;
         }
         else if (Vector3.Dot(swipeDirection, Vector3.left) > 0.8f)
         {
-            pointedObj = _grid.GetGridObject(_start.Data.Column - 1, _start.Data.Row);
+            pointedObj = _grid.GetGridObject(_start.Data.Row, _start.Data.Column - 1);
             SwipeDirection = SwipeDirection.Left;
         }
         else if ((Vector3.Dot(swipeDirection, Vector3.forward) > 0.8f))
         {
-            pointedObj = _grid.GetGridObject(_start.Data.Column, _start.Data.Row + 1);
+            pointedObj = _grid.GetGridObject(_start.Data.Row + 1, _start.Data.Column);
             SwipeDirection = SwipeDirection.Up;
-        }
+        }   
         else if ((Vector3.Dot(swipeDirection, Vector3.back) > 0.8f))
         {
-            pointedObj = _grid.GetGridObject(_start.Data.Column, _start.Data.Row - 1);
+            pointedObj = _grid.GetGridObject(_start.Data.Row - 1, _start.Data.Column);
             SwipeDirection = SwipeDirection.Down;
         }
 

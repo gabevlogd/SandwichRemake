@@ -19,7 +19,7 @@ public class Grid<TGridObject>
         m_cellSize = cellSize;
         m_originPosition = originPosition;
 
-        m_gridArray = new TGridObject[width, height];
+        m_gridArray = new TGridObject[height, width];
 
         for (int x = 0; x < m_gridArray.GetLength(0); x++) 
         {
@@ -47,8 +47,8 @@ public class Grid<TGridObject>
     
     public Vector2Int GetGridPosition(Vector3 worldPosition)
     {
-        int x = Mathf.FloorToInt((worldPosition - m_originPosition).x / m_cellSize);
-        int y = Mathf.FloorToInt((worldPosition - m_originPosition).z / m_cellSize);
+        int x = Mathf.FloorToInt((worldPosition - m_originPosition).z / m_cellSize);
+        int y = Mathf.FloorToInt((worldPosition - m_originPosition).x / m_cellSize);
         return new Vector2Int(x, y);
     }
 
@@ -57,8 +57,8 @@ public class Grid<TGridObject>
     /// </summary>
     public void GetXY(Vector3 worldPosition, out int x, out int y) 
     {
-        x = Mathf.FloorToInt((worldPosition - m_originPosition).x / m_cellSize);
-        y = Mathf.FloorToInt((worldPosition - m_originPosition).z / m_cellSize); // changed to z instead of y
+        x = Mathf.FloorToInt((worldPosition - m_originPosition).z / m_cellSize); // changed to z instead of y
+        y = Mathf.FloorToInt((worldPosition - m_originPosition).x / m_cellSize); 
     }
 
     /// <summary>
@@ -66,7 +66,7 @@ public class Grid<TGridObject>
     /// </summary>
     public TGridObject GetGridObject(int x, int y) 
     {
-        if (x >= 0 && y >= 0 && x < m_width && y < m_height) return m_gridArray[x, y];
+        if (x >= 0 && y >= 0 && x < m_height && y < m_width) return m_gridArray[x, y];
         else return default;
     }
 
@@ -83,35 +83,4 @@ public class Grid<TGridObject>
     
 
 }
-
-
-//understand before to use it:
-
-//public event EventHandler<OnGridObjectChangedEventArgs> OnGridObjectChanged;
-//public class OnGridObjectChangedEventArgs : EventArgs
-//{
-//    public int x;
-//    public int y;
-//}
-
-
-//public void SetGridObject(int x, int y, TGridObject value)
-//{
-//    if (x >= 0 && y >= 0 && x < m_width && y < m_height)
-//    {
-//        m_gridArray[x, y] = value;
-//        if (OnGridObjectChanged != null) OnGridObjectChanged(this, new OnGridObjectChangedEventArgs { x = x, y = y });
-//    }
-//}
-
-//public void TriggerGridObjectChanged(int x, int y)
-//{
-//    if (OnGridObjectChanged != null) OnGridObjectChanged(this, new OnGridObjectChangedEventArgs { x = x, y = y });
-//}
-
-//public void SetGridObject(Vector3 worldPosition, TGridObject value)
-//{
-//    GetXY(worldPosition, out int x, out int y);
-//    SetGridObject(x, y, value);
-//}
 

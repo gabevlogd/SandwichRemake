@@ -15,7 +15,7 @@ public class SwipeableObjectData
 
     public SwipeableObjectData(int x, int y)
     {
-        Row = y;
-        Column = x;
+        Row = x;
+        Column = y;
     }
 }

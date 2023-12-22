@@ -5,7 +5,7 @@ using UnityEngine;
 
 public class PlayState : StateBase<GameManager>
 {
-    public PlayState(string stateID) : base(stateID)
+    public PlayState(string stateID, StateMachine<GameManager> stateMachine) : base(stateID, stateMachine)
     {
     }
 

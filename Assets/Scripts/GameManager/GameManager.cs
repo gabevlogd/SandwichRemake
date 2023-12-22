@@ -11,9 +11,9 @@ public class GameManager : MonoBehaviour
     private UIManager _UIManager;
 
     private StateMachine<GameManager> _stateMachine;
-    public readonly PauseState Pause = new PauseState(Constants.PAUSE);
-    public readonly PlayState Play = new PlayState(Constants.PLAY);
-    public readonly WinState Win = new WinState(Constants.WIN);
+    public PauseState Pause;
+    public PlayState Play;
+    public WinState Win;
 
     public int CurrentLevelIndex { get => _currentLevelIndex; }
     private int _currentLevelIndex;
@@ -23,17 +23,33 @@ public class GameManager : MonoBehaviour
         Application.targetFrameRate = 120;
         _UIManager = FindObjectOfType(typeof(UIManager)) as UIManager;
         _swipesManager = FindObjectOfType(typeof(SwipesManager)) as SwipesManager;
-        _stateMachine = new StateMachine<GameManager>(this);
-        _stateMachine.AddState(Play);
-        _stateMachine.AddState(Pause);
-        _stateMachine.AddState(Win);
+        InitializeStateMachine();
+    }
+
+    private void OnEnable()
+    {
         HUD.PerformPause += () => _stateMachine.ChangeState(Pause);
         SwipeableObject.GameWon += () => _stateMachine.ChangeState(Win);
         LevelLoader.LevelLoaded += (LevelData data) => _currentLevelIndex = data.LevelIndex;
     }
 
-    private void Start() => _stateMachine.RunStateMachine(Pause);
-
     private void Update() => _stateMachine.CurrentState.OnUpdate(this);
+
+    private void InitializeStateMachine()
+    {
+        _stateMachine = new StateMachine<GameManager>(this);
+        InitializeStates();
+        _stateMachine.AddState(Play);
+        _stateMachine.AddState(Pause);
+        _stateMachine.AddState(Win);
+        _stateMachine.RunStateMachine(Pause, this);
+    }
+
+    private void InitializeStates()
+    {
+        Pause = new PauseState(Constants.PAUSE, _stateMachine);
+        Play = new PlayState(Constants.PLAY, _stateMachine);
+        Win = new WinState(Constants.WIN, _stateMachine);
+    }
 
 }

@@ -8,7 +8,7 @@ public class InvalidStackMoveState : StateBase<StacksAnimator>
     private Vector3 _point1;
     private Vector3 _point2;
 
-    public InvalidStackMoveState(string stateID) : base(stateID)
+    public InvalidStackMoveState(string stateID, StateMachine<StacksAnimator> stateMachine) : base(stateID, stateMachine)
     {
     }
 
@@ -97,7 +97,8 @@ public class InvalidStackMoveState : StateBase<StacksAnimator>
         else
         {
             context.TargetStack.transform.position = _point2;
-            ChangeState(context.Sleep);
+            //ChangeState(context.Sleep);
+            _stateMachine.ChangeState(context.Sleep);
         }
     }
 }
