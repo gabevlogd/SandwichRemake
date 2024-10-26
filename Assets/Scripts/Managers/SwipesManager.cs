@@ -28,42 +28,36 @@ public class SwipesManager : MonoBehaviour
 
     private void SwipesCheck()
     {
-        if (Input.touchCount != 1) return;
+
         if (_start != null && _end != null) return;
-
-        Touch touch = Input.GetTouch(0);
-
-        switch (touch.phase)
+        if (Input.GetMouseButtonDown(0))
         {
-            case TouchPhase.Began:
-                TryCacheSwipeData(touch, out _start);
-                break;
-            case TouchPhase.Ended:
-
-                if (_start == null) return;
-                _end = GetNeighbour(touch);
-                if (_end != null) TriggerStackMoevement?.Invoke(_start, _end);
-                else ResetSwipes();
-
-                break;
-            default:
-                return;
+            TryCacheSwipeData(Input.mousePosition, out _start);
+            return;
         }
-            
+        if (Input.GetMouseButtonUp(0))
+        {
+            if (_start == null) return;
+            _end = GetNeighbour(Input.mousePosition);
+            if (_end != null) TriggerStackMoevement?.Invoke(_start, _end);
+            else ResetSwipes();
+            return;
+        }
+
+
     }
 
-    private void TryCacheSwipeData(Touch touch, out SwipeableObject swipeData)
+    private void TryCacheSwipeData(Vector2 screenPos, out SwipeableObject swipeData)
     {
-        Vector3 pointedWorldPosition = GetScreenToWorld(touch.position);
+        Vector3 pointedWorldPosition = GetScreenToWorld(screenPos);
         if (_grid.GetGridObject(pointedWorldPosition) != null)
             swipeData = _grid.GetGridObject(pointedWorldPosition).This;
         else swipeData = null;
-        
     }
 
-    private SwipeableObject GetNeighbour(Touch touch)
+    private SwipeableObject GetNeighbour(Vector2 screenPos)
     {
-        Vector3 swipeDirection = (GetScreenToWorld(touch.position) - _grid.GetWorldPosition(_start.Data.Column, _start.Data.Row)).normalized;
+        Vector3 swipeDirection = (GetScreenToWorld(screenPos) - _grid.GetWorldPosition(_start.Data.Column, _start.Data.Row)).normalized;
         SwipeableObjectData pointedObj = null;
         if (Vector3.Dot(swipeDirection, Vector3.right) > 0.8f)
         {
@@ -79,7 +73,7 @@ public class SwipesManager : MonoBehaviour
         {
             pointedObj = _grid.GetGridObject(_start.Data.Row + 1, _start.Data.Column);
             SwipeDirection = SwipeDirection.Up;
-        }   
+        }
         else if ((Vector3.Dot(swipeDirection, Vector3.back) > 0.8f))
         {
             pointedObj = _grid.GetGridObject(_start.Data.Row - 1, _start.Data.Column);
@@ -109,10 +103,7 @@ public class SwipesManager : MonoBehaviour
     private void OnDrawGizmos() => DisplayPointerDebug();
     private void DisplayPointerDebug()
     {
-        if (Input.touchCount != 1) return;
-
-        Touch touch = Input.GetTouch(0);
-        Debug.DrawRay(_camera.ScreenPointToRay(touch.position).origin, _camera.ScreenPointToRay(touch.position).direction * 100f, Color.green);
+        Debug.DrawRay(_camera.ScreenPointToRay(Input.mousePosition).origin, _camera.ScreenPointToRay(Input.mousePosition).direction * 100f, Color.green);
     }
 #endif
 
