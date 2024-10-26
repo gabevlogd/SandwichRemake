@@ -37,9 +37,13 @@ public class WinState : StateBase<GameManager>
     private void CheckNextLevelInput(GameManager context)
     {
         if (!_inputEnabled) return;
+#if PLATFORM_WEBGL
+        if (Vector2.Dot(PointerDeltaHandler.DeltaPos.normalized, Vector2.right) > 0.99f && PointerDeltaHandler.DeltaPos.magnitude > 30f)
+#else
         if (Input.touchCount == 0) return;
         Touch touch = Input.GetTouch(0);
         if (Vector2.Dot(touch.deltaPosition.normalized, Vector2.right) > 0.99f && touch.deltaPosition.magnitude > 30f)
+#endif
         {
             SoundManager.Play(Constants.SWIPE);
             _stateMachine.ChangeState(context.Play);
